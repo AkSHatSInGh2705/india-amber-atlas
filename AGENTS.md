@@ -28,3 +28,12 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- The FoodBridge landing is an imperative GSAP engine (`src/lib/foodbridge-engine.ts`) driving static markup; keep scene logic there rather than in React state, because it was ported as-is from the original Next.js app.
+- The 3D India map (`src/components/foodbridge/india-globe.tsx`, R3F) talks to the engine only through the plain `globe` object in `src/lib/india3d.ts`; the engine animates `globe.state`, the scene reads it per frame, so neither imports the other.
+- 3D world units equal the SVG map units of `src/lib/map-data.json` (equirectangular: x = 31.5164·lon − 2127.208, y = 1274.27 − 33.966·lat), so the flat 3D pose lines up pixel-for-pixel with the 2D map for the crossfade.
+- Terrain and night-light textures are pre-baked offline (AWS Terrarium elevation, sqrt-encoded to `HMAX` metres; NASA Black Marble 2016) into that same map space and served as Lovable assets; rebake both if the map projection changes.
+- Dev builds expose `window.__globe` (state + `debug()`) and `window.__gsap` for scripted checks; the sandbox renders WebGL at ~1 fps, so call `__gsap.ticker.lagSmoothing(0)` before timing anything.
+- tsconfig turns off `noUncheckedIndexedAccess` and `noPropertyAccessFromIndexSignature` because the ported engine relies on plain indexed access.

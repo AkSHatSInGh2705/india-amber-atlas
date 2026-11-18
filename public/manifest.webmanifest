@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "FoodBridge · Local Food-Surplus Redistribution",
+  "short_name": "FoodBridge",
+  "description": "Connecting surplus food to people who need it — donors, NGOs and individuals in Gurugram.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#F5F0E6",
+  "theme_color": "#1E3F20",
+  "prefer_related_applications": false,
+  "categories": ["food", "social", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
