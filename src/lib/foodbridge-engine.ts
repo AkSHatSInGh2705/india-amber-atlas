@@ -2,6 +2,8 @@ import gsap from 'gsap'
 import MAP_DATA from './map-data.json'
 import { STEPS, VENDORS, type Vendor } from './foodbridge-data'
 import { globe } from './india3d'
+import { HM, inkClip } from './ink'
+import { LISTINGS_EVENT, latestListings, type ListingsDetail, type MapListing } from './listings'
 
 type MapData = {
   states: { n: string; d: string }[]
@@ -19,14 +21,6 @@ const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
-// Harmonics for the wobbly "ink" reveal edge: [frequency, amplitude, phase, speed]
-const HM: [number, number, number, number][] = [
-  [3, 0.16, 1.1, 0.9],
-  [5, 0.12, 2.3, -1.3],
-  [8, 0.09, 0.4, 1.7],
-  [13, 0.06, 3.1, -2.1],
-  [21, 0.035, 1.9, 2.6],
-]
 
 /**
  * Imperative scroll/GSAP scene. Runs once against the static markup rendered by
@@ -302,6 +296,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
     tsp = m > 0 ? clamp(scrollY / m) : 0
   }
   function reveal() {
+    revealed = true
     gsap.fromTo(
       $$('#hero>*'),
       { y: 38, autoAlpha: 0 },
@@ -364,7 +359,10 @@ export function initFoodBridge(root: HTMLElement): () => void {
     return w
   }
   V.forEach((_, i) => addPin(i))
-  const reserved = new Set<number>()
+  const BASE = V.length
+  const keyOf = (v: Vendor) => (v as MapListing).key ?? v.name
+  // Reserved pickups are keyed by vendor, so re-syncing listings never shifts them
+  const reserved = new Set<string>()
   const rect = (b: Element): [number, number] => {
     const r = b.getBoundingClientRect()
     return [r.left + r.width / 2, r.top + r.height / 2]
@@ -495,49 +493,6 @@ export function initFoodBridge(root: HTMLElement): () => void {
   }
 
   type ClipEl = HTMLElement & { _o?: [number, number] }
-  function inkClip(el: HTMLElement, sx: number, sy: number, dir: boolean, done?: () => void, dur?: number) {
-    const r = el.getBoundingClientRect(),
-      cx = sx - r.left,
-      cy = sy - r.top,
-      w = r.width,
-      h = r.height,
-      o = { q: dir ? 0 : 1 }
-    const mx = Math.max(Math.hypot(cx, cy), Math.hypot(w - cx, cy), Math.hypot(cx, h - cy), Math.hypot(w - cx, h - cy)) * 1.05 + 12
-    const upd = () => {
-      const q = o.q,
-        R = q * mx,
-        g = Math.min(1, q * 5) * (1 - q * q),
-        tt = q * 5
-      let d = ''
-      for (let i = 0; i <= 90; i++) {
-        const a = (i / 90) * 6.2832
-        let m = 1
-        for (const [k, am, p0, spd] of HM) m += am * g * Math.sin(k * a + p0 + spd * tt)
-        const rr = R * m
-        d += (i ? 'L' : 'M') + (cx + Math.cos(a) * rr).toFixed(1) + ' ' + (cy + Math.sin(a) * rr).toFixed(1)
-      }
-      d += 'Z'
-      for (let i = 0; i < 4; i++) {
-        const a = i * 1.7 + 0.6,
-          dd = R * (1.12 + 0.04 * i),
-          rd = (4 + i * 2.5) * Math.min(1, q * 3) * (1 - q)
-        if (rd > 0.5)
-          d += `M${(cx + Math.cos(a) * dd + rd).toFixed(1)} ${(cy + Math.sin(a) * dd).toFixed(1)}a${rd} ${rd} 0 1 0 ${-2 * rd} 0a${rd} ${rd} 0 1 0 ${2 * rd} 0Z`
-      }
-      el.style.clipPath = `path('${d}')`
-    }
-    upd()
-    return gsap.to(o, {
-      q: dir ? 1 : 0,
-      duration: reduce ? 0.2 : (dur ?? (dir ? 1.2 : 0.7)),
-      ease: dir ? 'power2.out' : 'power2.in',
-      onUpdate: upd,
-      onComplete() {
-        if (dir) el.style.clipPath = 'none'
-        else if (done) done()
-      },
-    })
-  }
 
   const itemRows = (v: Vendor) =>
     v.items
@@ -558,7 +513,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
     $('#drn').textContent = v.name
     $('#drw').innerHTML = `Pickup window <b>${esc(v.pickupWindow)}</b>`
     $('#dri').innerHTML = itemRows(v)
-    $('#drnote').textContent = i === mine ? 'Your volunteer listing · demo entry' : 'Simulated vendor · demo data'
+    $('#drnote').textContent = i === mine ? 'Your listing · only your account can edit it' : i >= BASE ? 'Volunteer listing · live' : 'Simulated vendor · demo data'
     setReg()
     dr.style.visibility = 'visible'
     dr.setAttribute('aria-hidden', 'false')
@@ -715,7 +670,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
     LOCK =
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
   function setReg() {
-    const locked = reserved.has(cur)
+    const locked = reserved.has(keyOf(V[cur]))
     regB.classList.toggle('locked', locked)
     regB.innerHTML = locked ? `${LOCK}Locked` : 'Register to Collect'
     regB.setAttribute('aria-disabled', String(locked))
@@ -741,7 +696,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
   }
 
   regB.onclick = (e) => {
-    if (reserved.has(cur)) {
+    if (reserved.has(keyOf(V[cur]))) {
       if (!reduce) gsap.fromTo(regB, { x: 0 }, { keyframes: { x: [0, -7, 7, -4, 4, 0] }, duration: 0.45, ease: 'sine.inOut' })
       toast('This food is already waiting to be served to needy stomachs, please choose another volunteer')
       return
@@ -767,7 +722,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
     vl.scrollTop = 0
     document.documentElement.style.overflow = 'hidden'
     inkClip(vl, vxy[0], vxy[1], true)
-    gsap.from($$('#vl .rgs>*,#vl form>*,#vdone>*'), { y: 20, opacity: 0, duration: 0.6, stagger: 0.04, delay: 0.35, ease: 'power3.out', clearProps: 'transform,opacity' })
+    gsap.from($$('#vl .rgs>*,#vl .vview>*'), { y: 20, opacity: 0, duration: 0.6, stagger: 0.04, delay: 0.35, ease: 'power3.out', clearProps: 'transform,opacity' })
   }
   function closeVl(done?: () => void) {
     inkClip(vl, vxy[0], vxy[1], false, () => {
@@ -779,36 +734,43 @@ export function initFoodBridge(root: HTMLElement): () => void {
   }
   vcta.addEventListener('click', openVl, { signal })
   $('#vlx').onclick = () => closeVl()
-  addEventListener(
-    'fb:vol-add',
-    (e) => {
-      if (mine >= 0) return
-      V.push((e as CustomEvent<Vendor>).detail)
-      mine = V.length - 1
-      const w = addPin(mine)
-      w.classList.add('mine')
-      gsap.set(w.firstChild, { autoAlpha: 0 })
-      popPending = true
-      setCta()
-      render()
-    },
-    { signal },
-  )
-  addEventListener(
-    'fb:vol-del',
-    () => {
-      if (mine < 0) return
-      if (dopen && cur === mine) closeDr()
-      VP[mine].remove()
-      VP.splice(mine, 1)
-      V.splice(mine, 1)
-      reserved.delete(mine)
-      mine = -1
-      popPending = false
-      setCta()
-    },
-    { signal },
-  )
+  // Saved volunteer listings (published by the React panel) become live orbs beside the demo vendors
+  let revealed = false
+  function syncListings({ listings, pop }: ListingsDetail) {
+    const keep = new Set(listings.map((l) => l.key))
+    for (let i = V.length - 1; i >= BASE; i--) {
+      if (keep.has(keyOf(V[i]))) continue
+      if (dopen && cur === i) closeDr()
+      VP[i].remove()
+      VP.splice(i, 1)
+      V.splice(i, 1)
+      if (cur > i) cur--
+    }
+    for (const l of listings) {
+      const i = V.findIndex((v, j) => j >= BASE && keyOf(v) === l.key)
+      if (i >= 0) {
+        V[i] = l
+        const b = VP[i].firstChild as HTMLElement
+        b.setAttribute('aria-label', `${l.name}, surplus food available`)
+        b.querySelector('span')!.textContent = l.name
+        VP[i].classList.toggle('mine', l.mine)
+        continue
+      }
+      V.push(l)
+      const w = addPin(V.length - 1)
+      w.classList.toggle('mine', l.mine)
+      if (reserved.has(l.key)) w.classList.add('res')
+      if (l.key === pop) {
+        gsap.set(w.firstChild, { autoAlpha: 0 })
+        popPending = true
+      } else if (revealed) gsap.set(w.firstChild, { autoAlpha: 1 })
+    }
+    mine = V.findIndex((v) => (v as MapListing).mine)
+    if (mine < 0) popPending = false
+    setCta()
+    render()
+  }
+  addEventListener(LISTINGS_EVENT, (e) => syncListings((e as CustomEvent<ListingsDetail>).detail), { signal })
   addEventListener(
     'fb:vol-show',
     () =>
@@ -928,7 +890,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
       const v = V[cur],
         ref = 'FB-' + Math.random().toString(36).slice(2, 7).toUpperCase()
       VP[cur].classList.add('res')
-      reserved.add(cur)
+      reserved.add(keyOf(v))
       setReg()
       const ngo = (rf.querySelector('input') as HTMLInputElement).value
       const ok = $('#ok')
@@ -948,6 +910,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
   gsap.set([...$$('#hero>*'), $('#place'), ...$$('.vp button')], { autoAlpha: 0 })
   cams()
   cam = A
+  syncListings(latestListings())
   render()
   intro()
   addEventListener(
@@ -1048,6 +1011,15 @@ export function initFoodBridge(root: HTMLElement): () => void {
       gsap.to($('#tip'), { autoAlpha: 0, y: 8, duration: 0.35 })
       if (globe.state.on) flatten3D(zoomIn)
       else zoomIn()
+    },
+    { signal },
+  )
+
+  $('#snext').addEventListener(
+    'click',
+    (e) => {
+      e.preventDefault()
+      scrollTo({ top: $('#scroller').offsetHeight - innerHeight, behavior: reduce ? 'auto' : 'smooth' })
     },
     { signal },
   )

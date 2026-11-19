@@ -42,6 +42,8 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
+  // Sign-in redirects must always reach the network
+  if (url.pathname.startsWith('/~oauth')) return
 
   // Pages: network first so updates ship immediately, cached shell when offline
   if (request.mode === 'navigate') {

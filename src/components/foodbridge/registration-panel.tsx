@@ -21,6 +21,7 @@ export function RegistrationPanel() {
         <div>
           <form id="rf" noValidate>
             <h3>Register your NGO</h3>
+            <p className="rnote">No account needed. Your Darpan ID verifies your NGO.</p>
             <label>
               NGO name
               <input name="ngo" required autoComplete="off" />
