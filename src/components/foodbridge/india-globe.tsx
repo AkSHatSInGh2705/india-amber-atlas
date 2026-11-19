@@ -4,8 +4,6 @@ import { OrbitControls } from '@react-three/drei'
 import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
-import heightAsset from '@/assets/india-height.png.asset.json'
-import lightsAsset from '@/assets/india-lights.jpg.asset.json'
 import MAP_DATA from '@/lib/map-data.json'
 import { globe, MAP } from '@/lib/india3d'
 
@@ -53,7 +51,7 @@ function dataTex(src: TexImageSource, mip: boolean) {
 }
 
 async function loadAssets(): Promise<Assets> {
-  const [hi, li] = await Promise.all([loadImg(heightAsset.url), loadImg(lightsAsset.url)])
+  const [hi, li] = await Promise.all([loadImg('/india-height.png'), loadImg('/india-lights.jpg')])
   const hc = document.createElement('canvas')
   hc.width = hi.naturalWidth
   hc.height = hi.naturalHeight
