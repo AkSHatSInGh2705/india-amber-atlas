@@ -39,3 +39,4 @@ use the editor.
 - tsconfig turns off `noUncheckedIndexedAccess` and `noPropertyAccessFromIndexSignature` because the ported engine relies on plain indexed access.
 - Volunteer listings live in Lovable Cloud (`volunteer_listings` public-read/owner-write, phone in owner-only `volunteer_contacts`); React publishes them to the engine via `publishListings` in `src/lib/listings.ts` and the engine diffs pins by listing id, so the map never imports the backend client.
 - The ink-smear clip-path reveal lives in `src/lib/ink.ts` and is shared by the engine and React (`useInkSwap`), so every panel and view swap uses the same wet-ink edge.
+- The pickup directions window (`src/components/foodbridge/directions-window.tsx`) is a Google Maps Embed iframe using the managed browser key; the engine opens it only through `openDirections` in `src/lib/directions.ts`, so the engine stays free of React and Maps code.

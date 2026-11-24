@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { initFoodBridge } from '@/lib/foodbridge-engine'
+import { DirectionsWindow } from './directions-window'
 import { MapStage } from './map-stage'
 import { RegistrationPanel } from './registration-panel'
 import { VendorDrawer } from './vendor-drawer'
@@ -21,6 +22,7 @@ export function FoodBridgeExperience() {
       <VendorDrawer />
       <RegistrationPanel />
       <VolunteerPanel />
+      <DirectionsWindow />
       <div id="toast" role="status" aria-live="polite">
         <span className="tic" aria-hidden="true">
           <svg viewBox="0 0 24 24">

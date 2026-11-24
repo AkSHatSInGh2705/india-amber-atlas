@@ -301,3 +301,34 @@ blockquote{margin:22px 0 0;padding-left:16px;border-left:3px solid var(--orange)
 .vedit:hover{background:var(--green);color:var(--cream)}
 .vdel.arm{background:#B3402A;color:#fff}
 .vdel:disabled{opacity:.7;cursor:progress}
+
+/* ---------- Vendor card actions + floating directions window ---------- */
+.dra{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#dgo{border:0;cursor:pointer;background:var(--green);color:var(--cream);box-shadow:0 10px 24px rgba(30,63,32,.28)}
+#dgo:hover{background:#2A5430;box-shadow:0 14px 30px rgba(30,63,32,.36)}
+#dgo:hover svg{transform:translate(2px,-2px)}
+#dgo[hidden]{display:none}
+#dw{position:fixed;z-index:30;top:24px;right:24px;width:min(480px,calc(100vw - 48px));height:min(640px,calc(100dvh - 48px));background:var(--cream2);border:1px solid rgba(30,63,32,.14);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden}
+.dwin{display:flex;flex-direction:column;height:100%;padding:20px 20px 16px}
+.dwh{position:relative;padding-right:44px;cursor:grab;touch-action:none;user-select:none}
+.dwh:active{cursor:grabbing}
+.dwh .cl{right:-6px;top:-6px;background:#F3EBDA}
+#dwt{font:600 1.7rem/1.1 var(--serif);color:var(--green);margin:6px 0 8px}
+.dwr{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:13.5px;color:var(--ink);min-width:0}
+.dwr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dwr span:first-child{flex:none;max-width:45%;font-weight:700;color:var(--green)}
+.dwr svg{flex:none;width:16px;height:16px;fill:none;stroke:var(--orange);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dws{align-self:flex-start;margin-bottom:10px}
+.dws button:disabled{opacity:.4;cursor:default}
+.dwn{margin:0 0 10px;font-size:12.5px;color:var(--green);opacity:.75}
+.dwm{position:relative;flex:1;min-height:220px;border-radius:16px;overflow:hidden;background:#EDE5D3;border:1px solid rgba(30,63,32,.14)}
+.dwm iframe{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;transition:opacity .5s}
+.dwm.on iframe{opacity:1}
+.dwp{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center;font-size:13.5px;color:var(--green)}
+.dwp i{width:34px;height:34px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 0 rgba(217,107,67,.45);animation:dwpulse 1.6s ease-out infinite}
+@keyframes dwpulse{to{box-shadow:0 0 0 22px rgba(217,107,67,0)}}
+.dwl{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;margin-top:12px;font:700 13px var(--sans);color:var(--orange-d);text-decoration:none}
+.dwl svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.dwl:hover svg{transform:translate(2px,-2px)}
+@media(max-width:759px){#dw{top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;left:10px;bottom:10px;width:auto;height:auto}.dwh{cursor:default}}
+@media(prefers-reduced-motion:reduce){.dwp i{animation:none}}

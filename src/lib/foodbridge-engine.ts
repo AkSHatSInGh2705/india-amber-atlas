@@ -3,6 +3,7 @@ import MAP_DATA from './map-data.json'
 import { STEPS, VENDORS, type Vendor } from './foodbridge-data'
 import { globe } from './india3d'
 import { HM, inkClip } from './ink'
+import { directionsOpen, openDirections } from './directions'
 import { LISTINGS_EVENT, latestListings, type ListingsDetail, type MapListing } from './listings'
 
 type MapData = {
@@ -669,11 +670,28 @@ export function initFoodBridge(root: HTMLElement): () => void {
   const regB = $<HTMLButtonElement>('#reg'),
     LOCK =
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+  const goB = $<HTMLButtonElement>('#dgo')
+  // NGO's area of operation per reserved pickup: the fallback start point for directions
+  const ngoFrom = new Map<string, string>()
   function setReg() {
     const locked = reserved.has(keyOf(V[cur]))
     regB.classList.toggle('locked', locked)
     regB.innerHTML = locked ? `${LOCK}Locked` : 'Register to Collect'
     regB.setAttribute('aria-disabled', String(locked))
+    goB.hidden = !ngoFrom.has(keyOf(V[cur]))
+  }
+  function popGo(delay: number) {
+    if (goB.hidden) return
+    gsap.fromTo(
+      goB,
+      { scale: 0.4, autoAlpha: 0 },
+      { scale: 1, autoAlpha: 1, duration: reduce ? 0.2 : 1.1, ease: reduce ? 'none' : 'elastic.out(1, 0.5)', delay, clearProps: 'transform,opacity,visibility' },
+    )
+  }
+  goB.onclick = () => {
+    const v = V[cur],
+      [x, y] = rect(goB)
+    openDirections({ key: keyOf(v), name: v.name, area: v.area, pickupWindow: v.pickupWindow, from: ngoFrom.get(keyOf(v)) ?? '', x, y })
   }
 
   const toastEl = $('#toast'),
@@ -793,6 +811,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
     'keydown',
     (e) => {
       if (e.key === 'Escape') {
+        if (directionsOpen()) return
         if (rg.style.visibility === 'visible') closeRg()
         else if (vlOpen()) closeVl()
         else closeDr()
@@ -891,6 +910,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
         ref = 'FB-' + Math.random().toString(36).slice(2, 7).toUpperCase()
       VP[cur].classList.add('res')
       reserved.add(keyOf(v))
+      ngoFrom.set(keyOf(v), (rf.elements.namedItem('area') as HTMLInputElement).value.trim())
       setReg()
       const ngo = (rf.querySelector('input') as HTMLInputElement).value
       const ok = $('#ok')
@@ -900,8 +920,9 @@ export function initFoodBridge(root: HTMLElement): () => void {
       gsap.fromTo($$('#ok>*'), { y: 24, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, duration: 0.6, ease: 'power3.out' })
       $('#okx').onclick = (ev) => {
         ev.preventDefault()
+        // Keep the vendor card open so "Take me there" can pop in beside the lock
         closeRg()
-        closeDr()
+        popGo(0.55)
       }
     },
     { signal },
