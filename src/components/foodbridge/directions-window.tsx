@@ -1,35 +1,25 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react'
+import { ClientOnly } from '@tanstack/react-router'
 import gsap from 'gsap'
 import { inkClip } from '@/lib/ink'
-import {
-  DIRECTIONS_EVENT,
-  canEmbedOn,
-  embedDirectionsUrl,
-  navigationUrl,
-  placeQuery,
-  setDirectionsOpen,
-  type DirectionsTarget,
-} from '@/lib/directions'
+import { DIRECTIONS_EVENT, navigationUrl, placeQuery, setDirectionsOpen, type DirectionsTarget, type LatLng, type MapStatus, type Route } from '@/lib/directions'
 
 type Geo = 'idle' | 'locating' | 'ok' | 'denied'
-type LatLng = { lat: number; lng: number }
 
-const MAPS_KEY = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY'] as string | undefined
+// Leaflet needs `window` at import time, so the map module only loads in the browser
+const DirectionsMap = lazy(() => import('./directions-map'))
 
-/** Floating, draggable Google Maps route from the NGO to a reserved pickup, revealed with the shared ink smear. */
+/** Floating, draggable OpenStreetMap route from the NGO to a reserved pickup, revealed with the shared ink smear. */
 export function DirectionsWindow() {
   const [t, setT] = useState<DirectionsTarget | null>(null)
   const [src, setSrc] = useState<'gps' | 'area'>('gps')
   const [gps, setGps] = useState<LatLng | null>(null)
   const [geo, setGeo] = useState<Geo>('idle')
-  const [loaded, setLoaded] = useState(false)
-  const [embeddable, setEmbeddable] = useState(true)
+  const [status, setStatus] = useState<{ s: MapStatus; route?: Route | undefined }>({ s: 'routing' })
   const ref = useRef<HTMLElement>(null)
   const from = useRef<[number, number]>([0, 0])
   const wasOpen = useRef(false)
   const closing = useRef<gsap.core.Tween | null>(null)
-
-  useEffect(() => setEmbeddable(canEmbedOn(location.hostname)), [])
 
   const locate = useCallback(() => {
     if (!('geolocation' in navigator)) {
@@ -126,8 +116,7 @@ export function DirectionsWindow() {
   }
 
   const origin = !t ? null : src === 'gps' ? (gps ?? (geo === 'locating' ? null : t.from)) : t.from
-  const url = t && origin && MAPS_KEY && embeddable ? embedDirectionsUrl(MAPS_KEY, origin, t.area) : null
-  useEffect(() => setLoaded(false), [url])
+  const onStatus = useCallback((s: MapStatus, route?: Route) => setStatus({ s, route }), [])
 
   const fromLabel = !t ? '' : src === 'gps' && gps ? 'Your location' : t.from || 'Your area'
 
@@ -177,28 +166,28 @@ export function DirectionsWindow() {
             <p className="dwn">Location is off, so the route starts from your area of operation.</p>
           )}
 
-          <div className={`dwm${loaded ? ' on' : ''}`}>
-            {url ? (
-              <iframe
-                key={url}
-                title={`Route to ${t.name}`}
-                src={url}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
-                onLoad={() => setLoaded(true)}
-              />
-            ) : null}
-            {!loaded && (
+          <div className="dwm">
+            <ClientOnly fallback={null}>
+              <Suspense fallback={null}>
+                <DirectionsMap
+                  origin={origin}
+                  originLabel={fromLabel}
+                  destination={t.area}
+                  destinationLabel={t.name}
+                  onStatus={onStatus}
+                />
+              </Suspense>
+            </ClientOnly>
+            {status.s === 'ok' && status.route ? (
+              <p className="dwe">
+                <b>{status.route.min} min</b> · {status.route.km} km by road
+              </p>
+            ) : status.s === 'straight' ? (
+              <p className="dwe">Road route unavailable · straight-line view</p>
+            ) : (
               <div className="dwp">
                 <i aria-hidden="true" />
-                <span>
-                  {!MAPS_KEY || !embeddable
-                    ? 'The live map shows on the published site. Use the link below meanwhile.'
-                    : !origin
-                      ? 'Finding where you are…'
-                      : 'Drawing your route…'}
-                </span>
+                <span>{status.s === 'locating' ? 'Finding where you are…' : 'Drawing your route…'}</span>
               </div>
             )}
           </div>

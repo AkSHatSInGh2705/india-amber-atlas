@@ -321,10 +321,23 @@ blockquote{margin:22px 0 0;padding-left:16px;border-left:3px solid var(--orange)
 .dws{align-self:flex-start;margin-bottom:10px}
 .dws button:disabled{opacity:.4;cursor:default}
 .dwn{margin:0 0 10px;font-size:12.5px;color:var(--green);opacity:.75}
-.dwm{position:relative;flex:1;min-height:220px;border-radius:16px;overflow:hidden;background:#EDE5D3;border:1px solid rgba(30,63,32,.14)}
-.dwm iframe{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;transition:opacity .5s}
-.dwm.on iframe{opacity:1}
-.dwp{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center;font-size:13.5px;color:var(--green)}
+.dwm{position:relative;flex:1 0 280px;min-height:280px;border-radius:16px;overflow:hidden;background:#EDE5D3;border:1px solid rgba(30,63,32,.14)}
+.dwm .dwleaf{position:absolute;inset:0;width:100%;height:100%;min-height:280px;background:#EDE5D3;font:500 12px var(--sans);z-index:0}
+.dwleaf .leaflet-tile-pane{filter:saturate(.55) sepia(.12) contrast(.96)}
+.dwleaf .leaflet-control-zoom{border:0;box-shadow:0 6px 18px rgba(30,63,32,.18);border-radius:12px;overflow:hidden}
+.dwleaf .leaflet-control-zoom a{background:var(--cream2);color:var(--green);border-color:rgba(30,63,32,.12)}
+.dwleaf .leaflet-control-zoom a:hover{background:#F3EBDA}
+.dwleaf .leaflet-control-attribution{background:rgba(250,246,240,.85);color:rgba(28,28,28,.6);font-size:10px}
+.dwleaf .leaflet-control-attribution a{color:var(--green)}
+.dwleaf .leaflet-tooltip{background:var(--green);color:var(--cream);border:0;border-radius:999px;padding:4px 10px;font:700 11.5px var(--sans);box-shadow:0 6px 16px rgba(30,63,32,.3)}
+.dwleaf .leaflet-tooltip-top:before{border-top-color:var(--green)}
+.dwroute{stroke:var(--green)}
+.dwroute-halo{stroke:var(--cream2)}
+.dwpin-from{filter:grayscale(1) sepia(1) hue-rotate(60deg) saturate(2.4) brightness(.55)}
+.dwpin-to{filter:hue-rotate(168deg) saturate(1.5)}
+.dwe{position:absolute;z-index:500;left:12px;bottom:12px;margin:0;padding:7px 12px;border-radius:999px;background:var(--cream2);color:var(--green);font:500 12.5px var(--sans);box-shadow:0 6px 18px rgba(30,63,32,.18);pointer-events:none}
+.dwe b{font-weight:700}
+.dwp{position:absolute;z-index:500;inset:0;background:rgba(237,229,211,.82);display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center;font-size:13.5px;color:var(--green)}
 .dwp i{width:34px;height:34px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 0 rgba(217,107,67,.45);animation:dwpulse 1.6s ease-out infinite}
 @keyframes dwpulse{to{box-shadow:0 0 0 22px rgba(217,107,67,0)}}
 .dwl{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;margin-top:12px;font:700 13px var(--sans);color:var(--orange-d);text-decoration:none}
