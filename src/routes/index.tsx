@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FoodBridgeExperience } from "@/components/foodbridge/experience";
 import { InstallButton } from "@/components/pwa/install-button";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,6 +30,7 @@ function Index() {
       <h1 className="sr-only">FoodBridge</h1>
       <FoodBridgeExperience />
       <InstallButton />
+      <ThemeToggle />
     </main>
   );
 }

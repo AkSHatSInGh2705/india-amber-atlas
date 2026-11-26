@@ -10,6 +10,7 @@
 @import "tw-animate-css";
 @import "leaflet/dist/leaflet.css";
 @import "./foodbridge.css";
+@import "./foodbridge-dark.css";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -571,8 +571,8 @@ export function initFoodBridge(root: HTMLElement): () => void {
       if (instant) {
         gsap.set(ORB, { opacity: 0, scale: 0 })
         gsap.set(fl, { scale: 0 })
-        gsap.set(base, { backgroundColor: '#DDD3BC' })
-        gsap.set(sbtn, { color: '#8C8470' })
+        gsap.set(base, { backgroundColor: cssVar('--fb-base', '#DDD3BC') })
+        gsap.set(sbtn, { color: cssVar('--fb-sbtn', '#8C8470') })
         gsap.set(tk, { strokeDashoffset: 22 })
         gsap.set(vow, { backgroundColor: 'transparent' })
         return
@@ -580,9 +580,9 @@ export function initFoodBridge(root: HTMLElement): () => void {
       gsap.to(ORB, { opacity: 0, scale: 0, duration: 0.3, ease: 'power2.in' })
       gsap.to(vow, { backgroundColor: 'transparent', duration: 0.35, ease: 'sine.inOut' })
       gsap.to(tk, { strokeDashoffset: 22, duration: 0.3, ease: 'power2.in' })
-      gsap.to(base, { backgroundColor: '#DDD3BC', duration: 0.35, ease: 'sine.inOut' })
+      gsap.to(base, { backgroundColor: cssVar('--fb-base', '#DDD3BC'), duration: 0.35, ease: 'sine.inOut' })
       gsap.to(fl, { scale: 0, duration: 0.6, ease: 'power3.inOut' })
-      gsap.to(sbtn, { color: '#8C8470', duration: 0.45, ease: 'sine.inOut' })
+      gsap.to(sbtn, { color: cssVar('--fb-sbtn', '#8C8470'), duration: 0.45, ease: 'sine.inOut' })
       return
     }
     const sb = sub.getBoundingClientRect(),
@@ -601,7 +601,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
       },
       FLY = 1.1,
       T = 0.3 + FLY
-    gsap.to(vow, { backgroundColor: '#1E3F20', duration: 0.35, ease: 'sine.out' })
+    gsap.to(vow, { backgroundColor: cssVar('--green', '#1E3F20'), duration: 0.35, ease: 'sine.out' })
     gsap.to(tk, { strokeDashoffset: 0, duration: 0.5, ease: 'power2.out', delay: 0.05 })
     const TL = (tlV = gsap.timeline())
     TL.fromTo(vow, { scale: 1 }, { scale: 1.16, duration: 0.22, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 0)
@@ -630,7 +630,7 @@ export function initFoodBridge(root: HTMLElement): () => void {
       .to(ORB[0], { scale: 0, opacity: 0, duration: 0.6, ease: 'power3.inOut' }, T + 0.18)
       .to(fl, { scale: (Math.hypot(w, h) / 60) * 1.08, duration: 1.1, ease: 'expo.out' }, T + 0.12)
       .to(sbtn, { color: '#fff', duration: 0.5, ease: 'sine.out' }, T + 0.3)
-      .set(base, { backgroundColor: '#D96B43' }, T + 1.1)
+      .set(base, { backgroundColor: cssVar('--orange', '#D96B43') }, T + 1.1)
       .call(
         () => {
           if (on) sbtn.disabled = false
@@ -1089,4 +1089,9 @@ export function initFoodBridge(root: HTMLElement): () => void {
     window.__fbLive = false
     dispatchEvent(new Event('fb:live'))
   }
+}
+
+
+function cssVar(name: string, fallback: string) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback
 }

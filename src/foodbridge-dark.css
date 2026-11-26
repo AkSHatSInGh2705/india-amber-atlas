@@ -1,0 +1,97 @@
+/* Dark (espresso · orange · cream) theme. Light mode lives untouched in foodbridge.css. */
+html.dark{--cream:#18120E;--cream2:#1F1813;--green:#F97316;--ink:#FDF6EC;--orange:#EA580C;--orange-d:#FB923C;--sand:#CBBBA6;--surf2:#261D17;--line:rgba(245,235,217,.12);--line2:rgba(245,235,217,.24);--fb-base:#2E241C;--fb-sbtn:#8A7A66;color-scheme:dark}
+html.dark body.warm{background:var(--cream)}
+html.dark #warm{--land:#261D17;--edge:#120E0B;--hl:#33261C;--dland:#221A14;--dedge:rgba(249,115,22,.22);--gur:rgba(249,115,22,.3);--gedge:#F97316}
+html.dark .blob{mix-blend-mode:screen}
+html.dark #b1{background:radial-gradient(circle,rgba(234,88,12,.16),transparent 66%)}
+html.dark #b2{background:radial-gradient(circle,rgba(253,246,236,.06),transparent 66%)}
+html.dark #ov text{stroke:#18120E}
+html.dark [fill="#F5F0E6"]{fill:#18120E}
+html.dark [fill="#FAF6F0"]{fill:#1F1813}
+html.dark [stroke="#1E3F20"]{stroke:#F97316}
+html.dark [fill="#1E3F20"]{fill:#F97316}
+html.dark [stroke="#F5F0E6"]{stroke:#18120E}
+html.dark .vp.res button{--o:249,115,22;--hi:253,186,116}
+html.dark #place{color:var(--green);text-shadow:0 0 6px var(--cream),0 0 6px var(--cream)}
+
+/* cream headings, orange accents */
+html.dark h1,html.dark .rgs h2,html.dark #vl .rgs h2,html.dark #rf h3,html.dark #st,html.dark #drn,html.dark #ok h3,html.dark #vf h3,html.dark #vdone h3,html.dark .abody h3,html.dark .acheck h3,html.dark #dwt,html.dark .install-pop h3,html.dark #outro,html.dark blockquote,html.dark #snext b{color:var(--ink)}
+html.dark h1 em,html.dark #outro em,html.dark #snext b em{color:var(--green)}
+
+/* surfaces */
+html.dark #steps,html.dark .install-btn,html.dark .cl{background:rgba(31,24,19,.92);border-color:var(--line)}
+html.dark #steps,html.dark #toast,html.dark #vlist,html.dark .install-pop{box-shadow:0 18px 50px rgba(0,0,0,.5)}
+html.dark #outro{background:rgba(24,18,14,.9)}
+html.dark .chips span{background:rgba(31,24,19,.7)}
+html.dark #dr,html.dark #dw,html.dark #toast,html.dark #vlist,html.dark .install-pop{border:1px solid var(--line)}
+html.dark #rg,html.dark #vl{background:linear-gradient(160deg,#1A1410,#120E0B)}
+html.dark #rf input,html.dark #rf select,html.dark #vbtn,html.dark #vf input,html.dark #va input,html.dark #rgx,html.dark #vl .cl,html.dark .dwh .cl{background:var(--surf2);border-color:var(--line2)}
+html.dark #rf input,html.dark #rf select,html.dark #vf input,html.dark #va input{color:var(--ink)}
+html.dark #rf select option{background:var(--surf2)}
+html.dark #vbtn{color:var(--sand)}
+html.dark .sel.has #vbtn{color:var(--ink)}
+html.dark .vitem,html.dark .acct,html.dark #vl .vwhy{background:rgba(38,29,23,.6);border-color:var(--line)}
+html.dark #vl .vwhy{border-left-color:var(--orange)}
+html.dark #sx,html.dark .vrm,html.dark .seg,html.dark .vgone,html.dark .atabs{background:rgba(245,235,217,.07)}
+html.dark #seg i{background:var(--line)}
+html.dark #dri li,html.dark #rgi li,html.dark #vdone li{border-top-color:var(--line)}
+html.dark #snext{border-top-color:var(--line)}
+html.dark #snext .mouse{border-color:var(--line2)}
+html.dark .vadd{border-color:var(--line2)}
+html.dark .aprov.l{border-color:var(--line2)}
+html.dark .aprov.l:not(:disabled):hover{background:rgba(245,235,217,.06)}
+html.dark .aor{color:var(--sand)}
+html.dark .aor::before,html.dark .aor::after{background:var(--line)}
+
+/* muted text */
+html.dark #seg li{color:rgba(203,187,166,.55)}
+html.dark #seg li.on{color:var(--green)}
+html.dark #snext small{color:var(--sand)}
+html.dark #dri span,html.dark #vdone li span,html.dark .note,html.dark .rnote,html.dark .asub,html.dark #vl .vcap{opacity:1;color:var(--sand)}
+
+/* reds stay readable */
+html.dark #dri em.n,html.dark #vdone em.n,html.dark .aerr{border-color:#F87171;color:#F87171}
+html.dark .aerr{background:rgba(248,113,113,.1)}
+html.dark .vdel{border-color:#F87171;color:#F87171}
+html.dark .vdel:hover,html.dark .vdel.arm,html.dark .seg button.n[aria-pressed=true]{background:#DC2626;color:#fff}
+html.dark .sel.bad #vbtn,html.dark #vf input:user-invalid,html.dark #va input:user-invalid{border-color:#F87171}
+
+/* buttons */
+html.dark .btn{box-shadow:0 10px 24px rgba(234,88,12,.28)}
+html.dark #reg.locked,html.dark #reg.locked:hover{background:#2E241C;color:var(--sand)}
+html.dark #sbtn{border-color:#4A3B2E}
+html.dark #dgo{box-shadow:0 10px 24px rgba(249,115,22,.25)}
+html.dark #dgo:hover{background:#FB923C}
+html.dark .install-btn:hover{box-shadow:0 14px 34px rgba(249,115,22,.25)}
+html.dark .chips span:hover b{color:#7C2D12}
+
+/* directions map */
+html.dark .dwm,html.dark .dwm .dwleaf{background:#1A1410;border-color:var(--line)}
+html.dark .dwleaf .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) sepia(.25) saturate(.7)}
+html.dark .dwleaf .leaflet-control-zoom a{border-color:var(--line)}
+html.dark .dwleaf .leaflet-control-zoom a:hover{background:var(--surf2)}
+html.dark .dwleaf .leaflet-control-attribution{background:rgba(31,24,19,.85);color:var(--sand)}
+html.dark .dwp{background:rgba(24,18,14,.82)}
+html.dark .dwpin-from{filter:hue-rotate(10deg) saturate(1.2) brightness(1.1)}
+
+/* ---------- Theme toggle ---------- */
+.theme-tg{position:fixed;z-index:50;top:calc(16px + env(safe-area-inset-top,0px));left:16px;width:44px;height:44px;padding:0;border-radius:50%;border:1px solid rgba(30,63,32,.16);background:rgba(250,246,240,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:grid;place-items:center;cursor:pointer;animation:fbIn .7s 1.2s both cubic-bezier(.2,.8,.2,1);transition:transform .25s}
+html.dark .theme-tg{background:rgba(31,24,19,.92);border-color:var(--line)}
+.theme-tg:hover{transform:scale(1.06)}
+.theme-tg:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+.theme-tg:disabled{cursor:default}
+.theme-tg .tg-ic{width:28px;height:28px;display:grid;place-items:center}
+.cel{width:28px;height:28px;overflow:visible}
+.cel.sun{color:#F59E0B;filter:drop-shadow(0 0 5px rgba(251,191,36,.85));animation:sunglow 2.6s ease-in-out infinite}
+.cel.sun .rays{transform-origin:12px 12px;animation:rays 2.6s ease-in-out infinite}
+.cel.moon{color:#FDF6EC;filter:drop-shadow(0 0 5px rgba(253,246,236,.7));animation:moonglow 3s ease-in-out infinite}
+@keyframes sunglow{50%{filter:drop-shadow(0 0 10px rgba(251,146,60,.95)) drop-shadow(0 0 18px rgba(251,191,36,.45))}}
+@keyframes rays{50%{transform:scale(1.12) rotate(12deg);opacity:.75}}
+@keyframes moonglow{50%{filter:drop-shadow(0 0 10px rgba(253,246,236,.95)) drop-shadow(0 0 20px rgba(226,232,240,.4))}}
+.theme-fx{position:fixed;inset:0;z-index:100;pointer-events:none;overflow:hidden}
+.theme-fx svg{position:absolute;inset:0;width:100%;height:100%}
+.theme-fx .fx-fill{position:absolute;inset:0}
+.theme-fx .fx-body{position:absolute;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;display:grid;place-items:center;will-change:transform}
+.theme-fx .fx-body .cel{width:34px;height:34px}
+@media(max-width:760px){.theme-tg{top:calc(12px + env(safe-area-inset-top,0px));left:12px;width:40px;height:40px}}
+@media(prefers-reduced-motion:reduce){.cel.sun,.cel.sun .rays,.cel.moon,.theme-tg{animation:none}}

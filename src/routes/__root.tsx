@@ -109,6 +109,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       {
+        // Apply the saved theme before first paint so dark mode never flashes light
+        children:
+          "try{if(localStorage.getItem('fb-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}",
+      },
+      {
         // Chrome/Brave fire beforeinstallprompt before React hydrates, so it must be captured inline
         children:
           "addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__fbPrompt=e;dispatchEvent(new Event('fb:installable'))});addEventListener('appinstalled',function(){window.__fbPrompt=null;window.__fbInstalled=true});",
@@ -123,7 +128,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
