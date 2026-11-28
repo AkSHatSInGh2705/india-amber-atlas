@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import gsap from 'gsap'
+import { Button } from '@/components/ui/button'
+import { orbitPoint, THEME_TIMING, zipperInkPath } from '@/lib/theme-zipper'
 
 export type Theme = 'light' | 'dark'
 export const THEME_KEY = 'fb-theme'
@@ -31,26 +33,30 @@ function Moon() {
   )
 }
 
-const NIGHT = 'radial-gradient(circle at 70% 30%,#2A1E15,#120E0B 70%)'
-const DAY = 'radial-gradient(circle at 70% 30%,#FFF8EC,#EBE1CB 75%)'
-
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>('light')
+  const [flightTheme, setFlightTheme] = useState<Theme>('light')
   const [live, setLive] = useState(false)
   const [busy, setBusy] = useState(false)
   const btn = useRef<HTMLButtonElement>(null)
   const fx = useRef<HTMLDivElement>(null)
+  const animation = useRef<gsap.core.Timeline | null>(null)
+  const transitioning = useRef(false)
+  const maskId = useId().replace(/:/g, '')
 
   useEffect(() => {
     setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
     const sync = () => setLive(window.__fbLive === true)
     sync()
     addEventListener('fb:live', sync)
-    return () => removeEventListener('fb:live', sync)
+    return () => {
+      removeEventListener('fb:live', sync)
+      animation.current?.kill()
+    }
   }, [])
 
   function toggle() {
-    if (busy || !btn.current || !fx.current) return
+    if (transitioning.current || !live || !btn.current || !fx.current) return
     const next: Theme = theme === 'dark' ? 'light' : 'dark'
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
@@ -58,7 +64,6 @@ export function ThemeToggle() {
       setTheme(next)
       return
     }
-    setBusy(true)
     const root = fx.current
     const w = innerWidth,
       h = innerHeight
@@ -73,108 +78,98 @@ export function ThemeToggle() {
       sy = h * 0.62,
       c2x = w * 0.16,
       c2y = h * 0.12
-    const q = (t: number, a: number, b: number, c: number) => (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c
-
-    const trail = root.querySelector<SVGPathElement>('.fx-trail')!
-    const outB = root.querySelector<HTMLElement>('.fx-out')!
-    const inB = root.querySelector<HTMLElement>('.fx-in')!
-    const fill = root.querySelector<HTMLElement>('.fx-fill')!
-    const toDark = next === 'dark'
-    trail.setAttribute('d', `M${bx} ${by}Q${cx} ${cy} ${ex} ${ey}`)
-    trail.setAttribute('stroke-width', String(Math.max(90, Math.min(w, h) * 0.24)))
-    trail.setAttribute('stroke', toDark ? 'url(#fxNight)' : 'url(#fxDay)')
-    const len = trail.getTotalLength()
-    fill.style.background = toDark ? NIGHT : DAY
-    const ox = w * 0.5,
-      oy = h * 0.6,
-      R = Math.hypot(Math.max(ox, w - ox), Math.max(oy, h - oy)) + 40
-
+    const tear = root.querySelector<SVGPathElement>('.fx-tear')
+    const outB = root.querySelector<HTMLElement>('.fx-out')
+    const inB = root.querySelector<HTMLElement>('.fx-in')
+    const fill = root.querySelector<SVGSVGElement>('.fx-ink')
+    const icon = btn.current.querySelector<HTMLElement>('.tg-ic')
+    if (!tear || !outB || !inB || !fill || !icon) return
+    transitioning.current = true
+    setFlightTheme(theme)
+    setBusy(true)
+    root.dataset['target'] = next
+    fill.setAttribute('viewBox', `0 0 ${w} ${h}`)
+    const outgoing = { start: { x: bx, y: by }, control: { x: cx, y: cy }, end: { x: ex, y: ey } }
+    const incoming = { start: { x: sx, y: sy }, control: { x: c2x, y: c2y }, end: { x: bx, y: by } }
+    const unzip = { travel: 0, expansion: 0 }
+    const drawTear = () => tear.setAttribute('d', zipperInkPath(outgoing, unzip.travel, unzip.expansion, w, h))
+    drawTear()
     root.style.display = 'block'
-    gsap.set(trail, { strokeDasharray: len, strokeDashoffset: len, opacity: 1 })
-    gsap.set(fill, { opacity: 1, clipPath: `circle(0px at ${ox}px ${oy}px)` })
+    gsap.set(fill, { opacity: 1 })
     gsap.set(outB, { x: bx, y: by, opacity: 1, scale: 1 })
     gsap.set(inB, { x: sx, y: sy, opacity: 1, scale: 1.15 })
-    btn.current.querySelector<HTMLElement>('.tg-ic')!.style.opacity = '0'
+    icon.style.opacity = '0'
 
     const p1 = { t: 0 },
-      p2 = { t: 0 },
-      cc = { r: 0 }
-    gsap
+      p2 = { t: 0 }
+    animation.current = gsap
       .timeline({
         onComplete() {
           root.style.display = 'none'
-          if (btn.current) btn.current.querySelector<HTMLElement>('.tg-ic')!.style.opacity = ''
+          icon.style.opacity = ''
+          transitioning.current = false
           setBusy(false)
         },
       })
       .to(p1, {
         t: 1,
-        duration: 1.2,
+        duration: THEME_TIMING.exit,
         ease: 'power2.in',
         onUpdate() {
-          gsap.set(outB, { x: q(p1.t, bx, cx, ex), y: q(p1.t, by, cy, ey), scale: 1 + p1.t * 0.5 })
-          trail.style.strokeDashoffset = String(len * (1 - p1.t))
+          gsap.set(outB, { ...orbitPoint(outgoing, p1.t), scale: 1 + p1.t * 0.5 })
+          unzip.travel = p1.t
+          drawTear()
         },
       })
       .to(p2, {
         t: 1,
-        duration: 1.2,
+        duration: THEME_TIMING.arrival,
         ease: 'power3.out',
         onUpdate() {
-          gsap.set(inB, { x: q(p2.t, sx, c2x, bx), y: q(p2.t, sy, c2y, by), scale: 1.15 - p2.t * 0.15 })
+          gsap.set(inB, { ...orbitPoint(incoming, p2.t), scale: 1.15 - p2.t * 0.15 })
         },
-      }, 1.2)
-      .to(cc, {
-        r: R,
-        duration: 0.95,
+      }, THEME_TIMING.exit)
+      .to(unzip, {
+        expansion: 1,
+        duration: THEME_TIMING.coverage,
         ease: 'power2.inOut',
-        onUpdate() {
-          fill.style.clipPath = `circle(${cc.r}px at ${ox}px ${oy}px)`
-        },
-      }, 1.2)
+        onUpdate: drawTear,
+      }, THEME_TIMING.exit)
       .call(() => {
         applyTheme(next)
         setTheme(next)
-        trail.style.opacity = '0'
-      }, [], 2.18)
-      .to(fill, { opacity: 0, duration: 0.6, ease: 'sine.inOut' }, 2.2)
+      }, [], THEME_TIMING.swap)
+      .to(fill, { opacity: 0, duration: THEME_TIMING.total - THEME_TIMING.swap, ease: 'sine.inOut' }, THEME_TIMING.swap)
   }
 
   return (
     <>
       {live && (
-        <button
+        <Button
           ref={btn}
           type="button"
           className="theme-tg"
+          variant="ghost"
+          size="icon"
           onClick={toggle}
           disabled={busy}
           aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
         >
           <span className="tg-ic">{theme === 'dark' ? <Moon /> : <Sun />}</span>
-        </button>
+        </Button>
       )}
       <div ref={fx} className="theme-fx" style={{ display: 'none' }} aria-hidden="true">
-        <svg>
+        <svg className="fx-ink" preserveAspectRatio="none">
           <defs>
-            <linearGradient id="fxNight" x1="0" x2="1">
-              <stop offset="0" stopColor="#120E0B" />
-              <stop offset="1" stopColor="#2A1E15" />
-            </linearGradient>
-            <linearGradient id="fxDay" x1="0" x2="1">
-              <stop offset="0" stopColor="#FFF8EC" />
-              <stop offset="1" stopColor="#F5E6C8" />
-            </linearGradient>
-            <filter id="fxBlur" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="14" />
-            </filter>
+            <mask id={maskId} className="fx-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+              <path className="fx-tear" />
+            </mask>
           </defs>
-          <path className="fx-trail" fill="none" strokeLinecap="round" filter="url(#fxBlur)" />
+          <rect className="fx-color" width="100%" height="100%" mask={`url(#${maskId})`} />
         </svg>
-        <div className="fx-fill" />
-        <div className="fx-body fx-out">{theme === 'dark' ? <Moon /> : <Sun />}</div>
-        <div className="fx-body fx-in">{theme === 'dark' ? <Sun /> : <Moon />}</div>
+        <div className="fx-body fx-out">{flightTheme === 'dark' ? <Moon /> : <Sun />}</div>
+        <div className="fx-body fx-in">{flightTheme === 'dark' ? <Sun /> : <Moon />}</div>
       </div>
     </>
   )

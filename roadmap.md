@@ -1,0 +1,3 @@
+- [x] Replace center-out theme reveal with a curved progressive ink zipper.
+- [x] Preserve palette, icon glow, and main-site-only visibility.
+- [x] Verify timing, map-to-site flow, both switches, and smaller screens (browser used the no-WebGL fallback; existing 3D scene unchanged).
